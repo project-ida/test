@@ -26,7 +26,15 @@ jobs:
       - name: Get modified notebooks
         id: get_modified_notebooks
         run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.ipynb$' > modified_notebooks.txt
+          # Check if 'github.event.before' is a valid commit
+          if git cat-file -e ${{ github.event.before }}^{commit} 2>/dev/null; then
+            # 'before' commit exists locally
+            git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.ipynb$' > modified_notebooks.txt
+          else
+            # Fetch the 'before' commit from the remote
+            git fetch origin ${{ github.event.before }} --depth=1
+            git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.ipynb$' > modified_notebooks.txt
+          fi
           cat modified_notebooks.txt
 
       - name: Add links to notebooks
