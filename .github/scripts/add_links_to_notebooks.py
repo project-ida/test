@@ -33,6 +33,8 @@ def add_links_to_notebook(notebook_path):
     with open(notebook_path, "r", encoding="utf-8") as f:
         notebook = nbformat.read(f, as_version=4)
 
+    modified = False  # Track if the notebook has been modified
+
     # Step 1: Check if the first cell is a Colab auto-added cell
     if notebook["cells"] and notebook["cells"][0]["cell_type"] == "markdown":
         first_cell = notebook["cells"][0]
@@ -42,9 +44,10 @@ def add_links_to_notebook(notebook_path):
         ):
             # Remove the Colab auto-added cell
             notebook["cells"].pop(0)
+            modified = True
             print(f"Removed Colab auto-added cell from: {notebook_path}")
 
-    # Step 2: Check the next cell
+    # Step 2: Check the next cell (new first cell after removal)
     if notebook["cells"]:
         second_cell = notebook["cells"][0]
         if second_cell["cell_type"] == "markdown":
@@ -59,24 +62,38 @@ def add_links_to_notebook(notebook_path):
                 if colab_link not in source or nbviewer_link not in source:
                     # Rewrite the cell with correct links
                     second_cell["source"] = full_links
+                    modified = True
                     print(f"Updated links in: {notebook_path}")
-                    with open(notebook_path, "w", encoding="utf-8") as f:
-                        nbformat.write(notebook, f)
-                    return True
-                else:
-                    # Links are correct; no changes needed
-                    print(f"No changes needed: {notebook_path}")
-                    return False
+            else:
+                # Add a new markdown cell if links are missing
+                links_cell = nbformat.v4.new_markdown_cell(source=full_links)
+                links_cell["id"] = str(uuid.uuid4())  # Add a unique ID to the new cell
+                notebook["cells"].insert(0, links_cell)
+                modified = True
+                print(f"Added links to: {notebook_path}")
+        else:
+            # If the second cell is not markdown, add the links as a new cell at the top
+            links_cell = nbformat.v4.new_markdown_cell(source=full_links)
+            links_cell["id"] = str(uuid.uuid4())  # Add a unique ID to the new cell
+            notebook["cells"].insert(0, links_cell)
+            modified = True
+            print(f"Added links to: {notebook_path}")
 
-    # Step 3: Add a new markdown cell with the correct links
-    links_cell = nbformat.v4.new_markdown_cell(source=full_links)
-    links_cell["id"] = str(uuid.uuid4())  # Add a unique ID to the new cell
-    notebook["cells"].insert(0, links_cell)
-    print(f"Added links to: {notebook_path}")
+    else:
+        # If there are no cells, add a new markdown cell with the correct links
+        links_cell = nbformat.v4.new_markdown_cell(source=full_links)
+        links_cell["id"] = str(uuid.uuid4())  # Add a unique ID to the new cell
+        notebook["cells"].insert(0, links_cell)
+        modified = True
+        print(f"Added links to: {notebook_path}")
 
-    with open(notebook_path, "w", encoding="utf-8") as f:
-        nbformat.write(notebook, f)
-    return True
+    # Save the notebook only if it was modified
+    if modified:
+        with open(notebook_path, "w", encoding="utf-8") as f:
+            nbformat.write(notebook, f)
+        print(f"Saved changes to: {notebook_path}")
+    else:
+        print(f"No changes needed: {notebook_path}")
 
 
 def main(file_list_path):
