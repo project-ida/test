@@ -69,12 +69,8 @@ def add_links_to_notebook(notebook_path):
                     return False
 
     # Step 3: Add a new markdown cell with the correct links
-    links_cell = {
-        "cell_type": "markdown",
-        "metadata": {},
-        "id": str(uuid.uuid4()),  # Add a unique ID to the new cell
-        "source": full_links,
-    }
+    links_cell = nbformat.v4.new_markdown_cell(source=full_links)
+    links_cell["id"] = str(uuid.uuid4())  # Add a unique ID to the new cell
     notebook["cells"].insert(0, links_cell)
     print(f"Added links to: {notebook_path}")
 
