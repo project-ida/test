@@ -1,6 +1,7 @@
 import os
 import sys
 import nbformat
+import uuid
 
 def add_links_to_notebook(notebook_path):
     # Read repository details from environment variables
@@ -71,6 +72,7 @@ def add_links_to_notebook(notebook_path):
     links_cell = {
         "cell_type": "markdown",
         "metadata": {},
+        "id": str(uuid.uuid4()),  # Add a unique ID to the new cell
         "source": full_links,
     }
     notebook["cells"].insert(0, links_cell)
