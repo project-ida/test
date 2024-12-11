@@ -1,0 +1,42 @@
+name: Add Links to Notebooks
+
+on:
+  push:
+    paths:
+      - "**/*.ipynb"
+
+jobs:
+  update-notebooks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nbformat
+
+      - name: Get modified notebooks
+        id: get_modified_notebooks
+        run: |
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.ipynb$' > modified_notebooks.txt
+          cat modified_notebooks.txt
+
+      - name: Add links to notebooks
+        if: success()
+        run: python .github/scripts/add_links_to_notebooks.py modified_notebooks.txt
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Added Colab and nbviewer links to notebooks" || echo "No changes to commit"
+          git push
