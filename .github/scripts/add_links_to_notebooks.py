@@ -32,51 +32,52 @@ def add_links_to_notebook(notebook_path):
     with open(notebook_path, "r", encoding="utf-8") as f:
         notebook = nbformat.read(f, as_version=4)
 
-    # Check if the first cell exists
-    if notebook["cells"]:
+    # Step 1: Check if the first cell is a Colab auto-added cell
+    if notebook["cells"] and notebook["cells"][0]["cell_type"] == "markdown":
         first_cell = notebook["cells"][0]
+        if (
+            first_cell.get("metadata", {}).get("colab_type") == "text"
+            and first_cell.get("metadata", {}).get("id") == "view-in-github"
+        ):
+            # Remove the Colab auto-added cell
+            notebook["cells"].pop(0)
+            print(f"Removed Colab auto-added cell from: {notebook_path}")
 
-        if first_cell["cell_type"] == "markdown":
-            source = first_cell["source"]
+    # Step 2: Check the next cell
+    if notebook["cells"]:
+        second_cell = notebook["cells"][0]
+        if second_cell["cell_type"] == "markdown":
+            source = second_cell["source"]
 
-            # If Colab exists but nbviewer is missing, or if links are incorrect
-            if "colab.research.google.com" in source:
-                has_nbviewer = "nbviewer.org" in source
-                if not has_nbviewer or colab_link not in source or nbviewer_link not in source:
-                    # Rewrite the cell with both correct links
-                    first_cell["source"] = full_links
+            # Check if the cell contains both Colab and nbviewer links
+            has_colab_link = "colab.research.google.com" in source
+            has_nbviewer_link = "nbviewer.org" in source
+
+            if has_colab_link and has_nbviewer_link:
+                # Validate the links
+                if colab_link not in source or nbviewer_link not in source:
+                    # Rewrite the cell with correct links
+                    second_cell["source"] = full_links
+                    print(f"Updated links in: {notebook_path}")
                     with open(notebook_path, "w", encoding="utf-8") as f:
                         nbformat.write(notebook, f)
-                    print(f"Updated notebook: {notebook_path} (rewrote first cell with correct links)")
                     return True
                 else:
-                    # Both links are present and correct; no changes needed
+                    # Links are correct; no changes needed
                     print(f"No changes needed: {notebook_path}")
                     return False
 
-        # If first cell is markdown but doesn't need changes, add a new cell above
-        new_links_cell = {
-            "cell_type": "markdown",
-            "metadata": {},
-            "source": full_links,
-        }
-        notebook["cells"].insert(0, new_links_cell)
-        with open(notebook_path, "w", encoding="utf-8") as f:
-            nbformat.write(notebook, f)
-        print(f"Updated notebook: {notebook_path} (added links as a new cell)")
-        return True
-
-    # If no cells exist or first cell is not markdown, add a new cell at the top
+    # Step 3: Add a new markdown cell with the correct links
     links_cell = {
         "cell_type": "markdown",
         "metadata": {},
         "source": full_links,
     }
     notebook["cells"].insert(0, links_cell)
+    print(f"Added links to: {notebook_path}")
 
     with open(notebook_path, "w", encoding="utf-8") as f:
         nbformat.write(notebook, f)
-    print(f"Updated notebook: {notebook_path} (added links as a new cell)")
     return True
 
 
