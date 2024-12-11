@@ -1,23 +1,33 @@
+import os
 import sys
 import nbformat
-import os
 
-def add_links_to_notebook(notebook_path, repo_base_url="https://github.com/project-ida/test/blob/main"):
+def add_links_to_notebook(notebook_path):
+    # Read repository details from environment variables
+    repo_owner = os.getenv("REPO_OWNER", "default-owner")
+    repo_name = os.getenv("REPO_NAME", "default-repo")
+    branch_name = os.getenv("BRANCH_NAME", "main")
+
+    # Templates for Colab and nbviewer links
     colab_template = (
-        '<a href="https://colab.research.google.com/github/{repo_path}" target="_parent">'
+        '<a href="https://colab.research.google.com/github/{repo_owner}/{repo_name}/blob/{branch}/{file_path}" target="_parent">'
         '<img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>'
     )
     nbviewer_template = (
         '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-        '<a href="https://nbviewer.org/github/{repo_path}" target="_parent">'
+        '<a href="https://nbviewer.org/github/{repo_owner}/{repo_name}/blob/{branch}/{file_path}" target="_parent">'
         '<img src="https://nbviewer.jupyter.org/static/img/nav_logo.svg" alt="Open In nbviewer" width="100"/></a>'
     )
 
-    # Compute the full relative path from the repository root
-    repo_path = os.path.relpath(notebook_path).replace("\\", "/")
-    full_colab_link = colab_template.format(repo_path=repo_path)
-    full_nbviewer_link = nbviewer_template.format(repo_path=repo_path)
-    full_links = f"{full_colab_link} {full_nbviewer_link}"
+    # Compute the relative file path from the repository root
+    file_path = os.path.relpath(notebook_path).replace("\\", "/")
+    colab_link = colab_template.format(
+        repo_owner=repo_owner, repo_name=repo_name, branch=branch_name, file_path=file_path
+    )
+    nbviewer_link = nbviewer_template.format(
+        repo_owner=repo_owner, repo_name=repo_name, branch=branch_name, file_path=file_path
+    )
+    full_links = f"{colab_link} {nbviewer_link}"
 
     with open(notebook_path, "r", encoding="utf-8") as f:
         notebook = nbformat.read(f, as_version=4)
@@ -32,7 +42,7 @@ def add_links_to_notebook(notebook_path, repo_base_url="https://github.com/proje
             # If Colab exists but nbviewer is missing, or if links are incorrect
             if "colab.research.google.com" in source:
                 has_nbviewer = "nbviewer.org" in source
-                if not has_nbviewer or full_colab_link not in source or full_nbviewer_link not in source:
+                if not has_nbviewer or colab_link not in source or nbviewer_link not in source:
                     # Rewrite the cell with both correct links
                     first_cell["source"] = full_links
                     with open(notebook_path, "w", encoding="utf-8") as f:
