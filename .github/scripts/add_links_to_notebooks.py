@@ -101,6 +101,10 @@ def main(file_list_path):
         files = [line.strip() for line in f if line.strip()]
 
     for notebook_path in files:
+        if not os.path.exists(notebook_path):
+            print(f"Skipped deleted file: {notebook_path}")
+            continue
+
         if notebook_path.endswith(".ipynb"):
             add_links_to_notebook(notebook_path)
 
