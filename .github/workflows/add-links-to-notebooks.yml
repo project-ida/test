@@ -51,9 +51,11 @@ jobs:
         run: |
           while IFS=$'\t' read -r status file; do
             relative_path="${file#./}"
-            target_dir="src/$(dirname "$relative_path")"
+            dir_part="$(dirname "$relative_path")"
+            dir_part="${dir_part#.}"  # Remove leading dot if dir_part is "."
+            target_dir="src/$dir_part"
             target_file="$target_dir/$(basename "$file" .ipynb).md"
-
+      
             if [[ "$status" == "D" ]]; then
               if [[ -f "$target_file" ]]; then
                 echo "Deleting source file: $target_file"
