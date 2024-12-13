@@ -53,9 +53,10 @@ jobs:
             relative_path="${file#./}"
             dir_part="$(dirname "$relative_path")"
             if [[ "$dir_part" == "." ]]; then
-              dir_part=""  # Treat files in the root as having no subdirectory
+              target_dir="src"
+            else
+              target_dir="src/$dir_part"
             fi
-            target_dir="src/$dir_part"
             target_file="$target_dir/$(basename "$file" .ipynb).md"
       
             if [[ "$status" == "D" ]]; then
