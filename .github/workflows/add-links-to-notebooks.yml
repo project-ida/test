@@ -49,6 +49,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add "*.ipynb"
           git commit -m "Added Colab and nbviewer links to notebooks" || echo "No changes to commit"
           git push
