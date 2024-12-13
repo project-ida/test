@@ -6,15 +6,15 @@ on:
       - "**/*.ipynb"
 
 jobs:
-  diff-notebooks:
+  process-notebooks:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Identify Modified and Deleted Notebooks
+        id: diff-notebooks
         run: |
-          # Check if 'github.event.before' is a valid commit
           if git cat-file -e ${{ github.event.before }}^{commit} 2>/dev/null; then
             git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep '\.ipynb$' > notebook_changes.txt
           else
@@ -22,13 +22,6 @@ jobs:
             git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep '\.ipynb$' > notebook_changes.txt
           fi
           cat notebook_changes.txt
-
-  add-links:
-    needs: diff-notebooks  # Depends on diff-notebooks job
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -38,39 +31,23 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install nbformat
+          pip install nbformat jupytext
 
-      - name: Add links to notebooks
+      - name: Add Links to Notebooks
         run: python .github/scripts/add_links_to_notebooks.py notebook_changes.txt
         env:
           REPO_OWNER: ${{ github.repository_owner }}
           REPO_NAME: ${{ github.event.repository.name }}
           BRANCH_NAME: ${{ github.ref_name }}
 
-      - name: Commit and Push Notebook Changes
+      - name: Commit Notebook Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "*.ipynb"
           git commit -m "Added Colab and nbviewer links to notebooks" || echo "No changes to commit"
-          git push
 
-  jupytext-conversion:
-    needs: add-links  # Ensure add-links job is completed first
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
-
-      - name: Install Jupytext
-        run: pip install jupytext
-
-      - name: Process Notebook Changes
+      - name: Convert Notebooks to Jupytext
         run: |
           while IFS=$'\t' read -r status file; do
             relative_path="${file#./}"
@@ -89,10 +66,13 @@ jobs:
             fi
           done < notebook_changes.txt
 
-      - name: Commit and Push Source File Changes
+      - name: Commit Jupytext Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/**/*.md
           git commit -m "Updated source files for modified notebooks" || echo "No changes to commit"
+
+      - name: Push All Changes
+        run: |
           git push
