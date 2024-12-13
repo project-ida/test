@@ -17,7 +17,7 @@ def add_links_to_notebook(notebook_path):
     nbviewer_template = (
         '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         '<a href="https://nbviewer.org/github/{repo_owner}/{repo_name}/blob/{branch}/{file_path}" target="_parent">'
-        '<img src="https://nbviewer.jupyter.org/static/img/nav_logo.svg" alt="Open In nbviewer" width="100"/></a>'
+        '<img src="https://nbviewer.org/static/img/nav_logo.svg" alt="Open In nbviewer" width="100"/></a>'
     )
 
     # Compute the relative file path from the repository root
@@ -54,8 +54,8 @@ def add_links_to_notebook(notebook_path):
             source = second_cell["source"]
 
             # Check if the cell contains both Colab and nbviewer links
-            has_colab_link = "colab.research.google.com" in source
-            has_nbviewer_link = "nbviewer.org" in source
+            has_colab_link = "colab" in source
+            has_nbviewer_link = "nbviewer" in source
 
             if has_colab_link and has_nbviewer_link:
                 # Validate the links
