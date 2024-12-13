@@ -52,7 +52,9 @@ jobs:
           while IFS=$'\t' read -r status file; do
             relative_path="${file#./}"
             dir_part="$(dirname "$relative_path")"
-            dir_part="${dir_part#.}"  # Remove leading dot if dir_part is "."
+            if [[ "$dir_part" == "." ]]; then
+              dir_part=""  # Treat files in the root as having no subdirectory
+            fi
             target_dir="src/$dir_part"
             target_file="$target_dir/$(basename "$file" .ipynb).md"
       
