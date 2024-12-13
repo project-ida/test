@@ -71,6 +71,11 @@ jobs:
             fi
           done < notebook_changes.txt
 
+      - name: List Generated Files
+        run: |
+          echo "Listing all files under src/:"
+          find src/ -type f
+          
       - name: Commit Jupytext Changes
         run: |
           git config --global user.name "github-actions[bot]"
