@@ -13,7 +13,7 @@ jupyter:
 ---
 
 <!-- #region id="3f826b5b-1cf7-45b2-9622-89c10dbf1eb2" -->
-<a href="https://colab.research.google.com/github/project-ida/test/blob/test/matt-test.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://nbviewer.org/github/project-ida/test/blob/test/matt-test.ipynb" target="_parent"><img src="https://nbviewer.org/static/img/nav_logo.svg" alt="Open In nbviewer" width="100"/></a>
+<a href="https://colab.research.google.com/github/project-ida/test/blob/main/matt-test.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://nbviewer.org/github/project-ida/test/blob/main/matt-test.ipynb" target="_parent"><img src="https://nbviewer.org/static/img/nav_logo.svg" alt="Open In nbviewer" width="100"/></a>
 <!-- #endregion -->
 
 <!-- #region id="a0c58e6c-2dcf-4992-8d16-db9ec301f4b4" -->
@@ -28,7 +28,7 @@ print("Hello World!")
 print("branch test")
 ```
 
-```python id="hh6eSMFS1dDw" outputId="62fd0039-71c6-4826-c1ff-bb9d4b268c66" colab={"base_uri": "https://localhost:8080/", "height": 472}
+```python colab={"base_uri": "https://localhost:8080/", "height": 472} id="hh6eSMFS1dDw" outputId="62fd0039-71c6-4826-c1ff-bb9d4b268c66"
 import matplotlib.pyplot as plt
 
 # Sample data
@@ -45,7 +45,7 @@ plt.show()
 
 ```
 
-```python id="9PwvhEhu1dqc" outputId="eba01fa2-35b1-4732-ed59-742338105fc5" colab={"base_uri": "https://localhost:8080/", "height": 472}
+```python colab={"base_uri": "https://localhost:8080/", "height": 472} id="9PwvhEhu1dqc" outputId="eba01fa2-35b1-4732-ed59-742338105fc5"
 import matplotlib.pyplot as plt
 import numpy as np
 
