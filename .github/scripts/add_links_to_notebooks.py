@@ -98,7 +98,12 @@ def add_links_to_notebook(notebook_path):
 
 def main(file_list_path):
     with open(file_list_path, "r") as f:
-        files = [line.strip() for line in f if line.strip()]
+        lines = f.readlines()
+
+    for line in lines:
+        status, file_path = line.strip().split("\t", 1)
+        if status in {"A", "M"}:
+            add_links_to_notebook(file_path)
 
     for notebook_path in files:
         if not os.path.exists(notebook_path):
