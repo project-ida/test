@@ -70,17 +70,12 @@ jobs:
               jupytext --to md --output "$target_file" "$file"
             fi
           done < notebook_changes.txt
-
-      - name: List Generated Files
-        run: |
-          echo "Listing all files under src/:"
-          find src/ -type f
           
       - name: Commit Jupytext Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/**/*.md
+          git add "*.md"
           git commit -m "Updated source files for modified notebooks" || echo "No changes to commit"
 
       - name: Push All Changes
