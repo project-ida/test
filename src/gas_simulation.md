@@ -31,6 +31,10 @@ import matplotlib.pyplot as plt
 from itertools import combinations
 from periodictable.formulas import formula as chemical_formula
 import random
+from plotly.offline import init_notebook_mode
+
+# Initialize offline mode for notebooks
+init_notebook_mode(connected=True)
 
 ```
 
@@ -908,7 +912,6 @@ def move_gas_atom(atom_position, atom_velocity, dt, gas_limits):
     # This scenario shouldn't happen because the gas molecule should have already be interacting with a Pd
     # atom before the molecule gets to the surface. This condition is just in case of some unknown edge case
     if new_z > gas_limits["z"][1]:
-        print("refect")
         new_gas_velocity = (vx, vy, -vz)  # Reflect z-velocity
         new_z = gas_limits["z"][1] - (new_z - gas_limits["z"][1])  # Adjust position for reflection
         new_gas_position = (atom_type, new_x, new_y, new_z)
@@ -1259,6 +1262,12 @@ bridge_sites, hollow_sites = identify_bridge_and_hollow_sites(surface_pd_atoms)
 plot_lattice(surface_pd_atoms+bridge_sites+hollow_sites, marker_color_map={"Bridge":"orange", "Hollow":"red"})
 ```
 
+We're going to need to have ways of easily finding the bridge sites and the hollow sites, so we will create some dictionaries:
+- `atom_to_bridges` - returns the bridges associated with an atom
+- `bridge_to_atoms` - returns the atoms neighbouring a bridge
+- `bridge_to_hollows` - returns the hollows neighbouring a bridge
+- `hollow_to_bridge` - returns the bridges neighbouring a hollow
+
 ```python
 def construct_site_dictionaries(surface_pd_atoms, bridge_sites, hollow_sites):
     """
@@ -1339,12 +1348,15 @@ def construct_site_dictionaries(surface_pd_atoms, bridge_sites, hollow_sites):
 
 ```
 
+Let's check it works.
+
 ```python
 atom_to_bridges, bridge_to_atoms, bridge_to_hollows, hollow_to_bridges = construct_site_dictionaries(surface_pd_atoms, bridge_sites, hollow_sites)
 ```
 
 ```python
-plot_lattice(surface_pd_atoms + atom_to_bridges[('Pd', 0.5, 0.5, 0.0)] + atom_to_bridges[('Pd', 2.0, 3.0, 0.0)] + atom_to_bridges[('Pd', 2.0, 1.0, 0.0)], marker_color_map={"Bridge":"orange"})
+plot_lattice(surface_pd_atoms + atom_to_bridges[('Pd', 0.5, 0.5, 0.0)] + atom_to_bridges[('Pd', 2.0, 3.0, 0.0)] +
+             atom_to_bridges[('Pd', 2.0, 1.0, 0.0)], marker_color_map={"Bridge":"orange"})
 ```
 
 ```python
@@ -1352,9 +1364,7 @@ plot_lattice(surface_pd_atoms  + atom_to_bridges[('Pd', 2.0, 3.0, 0.0)] + bridge
              +[atom_to_bridges[('Pd', 1.0, 1.0, 0.0)][0]] + bridge_to_hollows[atom_to_bridges[('Pd', 1.0, 1.0, 0.0)][0]], marker_color_map={"Bridge":"orange", "Hollow":"red"})
 ```
 
-```python
-
-```
+The most tricky bit now is to figure out where a $\rm H_2$ molecule should dissociate to once it's finished adsorbing to a surface $\rm Pd$. Hollows come first, followed by bridges and once they are filled then no dissociation can occur. In order to prevent multiple occupation of a given site, we have to keep track of what's already been occupied. It's a bit tricky because atoms share bridge sites and bridges share hollows. 
 
 ```python
 def calculate_dissociation_target(
