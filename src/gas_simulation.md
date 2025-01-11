@@ -932,10 +932,6 @@ and molecules with metal surfaces](https://webcf.waybackmachine.org/web/20240416
 An individual hydrogen molecule can form a chemical bond with an individual palladium atom - producing a so called dihydrogen complex. The result is a Pd-H bond length of 1.67 Å and a lengthening of the molecular H-H bond length from 0.74 Å to 0.864 Å. A visual comparison of these lengths is presented (to scale) below.
 
 ```python
-np.sqrt(1.67**2 - 0.432**2)
-```
-
-```python
 def draw_bond(ax, pos1, pos2, color='silver', width=2):
     """Draw a bond between two points."""
     ax.plot(
@@ -1203,7 +1199,7 @@ def adsorb_atop(atom_position, atom_velocity, atom_theta, surface_pd_atoms, bond
 
 ```
 
-Before we get there, we're going to need to identify the bridge and hollow sites.
+After the molecule gets adsorbed, we'll start the dissociation process. For this, we need to be able to to identify the bridge and hollow sites.
 
 ```python
 def identify_bridge_and_hollow_sites(surface_pd_atoms):
@@ -1364,7 +1360,7 @@ plot_lattice(surface_pd_atoms  + atom_to_bridges[('Pd', 2.0, 3.0, 0.0)] + bridge
              +[atom_to_bridges[('Pd', 1.0, 1.0, 0.0)][0]] + bridge_to_hollows[atom_to_bridges[('Pd', 1.0, 1.0, 0.0)][0]], marker_color_map={"Bridge":"orange", "Hollow":"red"})
 ```
 
-The most tricky bit now is to figure out where a $\rm H_2$ molecule should dissociate to once it's finished adsorbing to a surface $\rm Pd$. Hollows come first, followed by bridges and once they are filled then no dissociation can occur. In order to prevent multiple occupation of a given site, we have to keep track of what's already been occupied. It's a bit tricky because atoms share bridge sites and bridges share hollows. 
+The most tricky bit now is to figure out where a $\rm H_2$ molecule should dissociate to once it's finished adsorbing to a surface $\rm Pd$. Hollows come first, followed by bridges and once they are filled then no dissociation can occur. In order to prevent multiple occupation of a given site, we have to keep track of what's already been occupied. It's a bit tricky because atoms share bridges and bridges share hollows. 
 
 ```python
 def calculate_dissociation_target(
