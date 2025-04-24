@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: Identify Modified and Deleted Notebooks
         id: diff-notebooks
